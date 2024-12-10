@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: smp.group.task.tracking.TaskTrackingApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 28.93 s -- in smp.group.task.tracking.TaskTrackingApplicationTests
