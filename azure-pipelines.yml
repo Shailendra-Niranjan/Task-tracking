@@ -1,0 +1,46 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  MAVEN_CACHE_FOLDER: $(HOME)/.m2/repository
+  MAVEN_GOALS: 'clean verify'  # Ensures tests run before packaging
+
+steps:
+# Cache Maven Dependencies for Faster Builds
+- task: Cache@2
+  inputs:
+    key: 'maven | "$(Agent.OS)" | **/pom.xml'
+    path: $(MAVEN_CACHE_FOLDER)
+    restoreKeys: |
+      maven | "$(Agent.OS)"
+  displayName: 'Cache Maven Dependencies'
+
+# Setup Java Environment (JDK 17 recommended)
+- task: UseJavaVersion@1
+  inputs:
+    version: '17'  # Upgrade to JDK 17 for better performance & support
+    architecture: 'x64'
+  displayName: 'Set up JDK 17'
+
+# Run Maven Build
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOptions: '-Xmx3072m'  # Set memory limit
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '17'  # Ensure Java version consistency
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: $(MAVEN_GOALS)
+  displayName: 'Build & Run Tests'
+
+# Publish Build Artifacts (JAR/WAR) for Deployment
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: 'target/*.jar'
+    artifactName: 'drop'
+  displayName: 'Publish Build Artifact'
